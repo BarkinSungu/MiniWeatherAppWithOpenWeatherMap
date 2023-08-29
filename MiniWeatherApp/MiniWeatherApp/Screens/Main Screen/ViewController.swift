@@ -21,32 +21,49 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if let location = locations.last {
-            locationManager.stopUpdatingLocation()
-            
-            let latitude = location.coordinate.latitude
-            let longitude = location.coordinate.longitude
-            
-            print("latitude: \(latitude)")
-            print("longitude: \(longitude)")
-            
-            WeatherService.shared.fetchWeatherData(latitude: latitude, longitude: longitude) { result in
-                switch result {
-                case .success(let weatherData):
-                    DispatchQueue.main.async {
-                        print("Temp: \(weatherData.current.temp)")
-                        print("Icon: \(weatherData.current.weather.first?.main)")
-                        print("Daily min: \(weatherData.daily.first?.temp.min)")
-                        print("Daily min: \(weatherData.daily.first?.temp.max)")
-                        
-                        
+        guard let location = locations.last else { return }
+        locationManager.stopUpdatingLocation()
+        
+        let latitude = location.coordinate.latitude
+        let longitude = location.coordinate.longitude
+        
+        print("latitude: \(latitude)")
+        print("longitude: \(longitude)")
+        
+        reverseGeocodeLocation(location)
+        
+        WeatherService.shared.fetchWeatherData(latitude: latitude, longitude: longitude) { result in
+            switch result {
+            case .success(let weatherData):
+                DispatchQueue.main.async {
+                    print("Temp: \(weatherData.current.temp)")
+                    if let weatherMain = weatherData.current.weather.first?.main {
+                        print("Icon: \(weatherMain)")
                     }
-                case .failure(let error):
-                    print("Error fetching weather data: \(error)")
+                    if let dailyMin = weatherData.daily.first?.temp.min {
+                        print("Daily min: \(dailyMin)")
+                    }
+                    if let dailyMax = weatherData.daily.first?.temp.max {
+                        print("Daily max: \(dailyMax)")
+                    }
+                }
+            case .failure(let error):
+                print("Error fetching weather data: \(error)")
+            }
+        }
+    }
+
+    func reverseGeocodeLocation(_ location: CLLocation) {
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+            if let placemark = placemarks?.first {
+                if let city = placemark.locality {
+                    print("Your city: \(city)")
                 }
             }
         }
     }
+
         
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("Location manager error: \(error)")
