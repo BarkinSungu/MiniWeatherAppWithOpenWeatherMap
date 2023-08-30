@@ -40,29 +40,22 @@ class WeatherService {
     }
     
     struct WeatherData: Codable {
-        let lat: Double
-        let lon: Double
         let current: Current
         let daily: [Daily]
-    // Diğer alanları da ekleyebilirsiniz
     }
     struct Current: Codable {
-        let temp: Double                                //anlık sıcaklık
-        let feels_like: Double
-        let pressure: Int
-        let humidity: Int
+        let temp: Double                              //current temperature
         let weather: [Weather]
-        // Diğer alanları da ekleyebilirsiniz
     }
     struct Weather: Codable{
-        let main: String                               //hava durumu ikonu
+        let icon: String                              //current weather icon
     }
     struct Daily: Codable{
         let temp: Temp
     }
     struct Temp: Codable{
-        let min: Double                                 //Daily min
-        let max: Double                                 //Daily max
+        let min: Double                               //Daily min temperature
+        let max: Double                               //Daily max temperature
     }
 
 }
